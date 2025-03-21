@@ -43,14 +43,14 @@ def run_slice(slice_, root, outputs, num_covis, num_loc):
     outputs.mkdir(exist_ok=True, parents=True)
     query_list = dataset / "queries_with_intrinsics.txt"
     sfm_pairs = outputs / f"pairs-db-covis{num_covis}.txt"
-    loc_pairs = outputs / f"pairs-query-netvlad{num_loc}.txt"
-    ref_sfm = outputs / "sfm_superpoint+superglue"
-    results = outputs / f"CMU_hloc_superpoint+superglue_netvlad{num_loc}.txt"
+    loc_pairs = outputs / f"pairs-query-{args.global_extractor}{num_loc}.txt"
+    ref_sfm = outputs / f"sfm_{args.extractor}+{args.matcher}"
+    results = outputs / f"CMU_hloc_{args.extractor}+{args.matcher}_{args.global_extractor}{num_loc}.txt"
 
     # pick one of the configurations for extraction and matching
-    retrieval_conf = extract_features.confs["netvlad"]
-    feature_conf = extract_features.confs["superpoint_aachen"]
-    matcher_conf = match_features.confs["superglue"]
+    retrieval_conf = extract_features.confs[args.global_extractor]
+    feature_conf = extract_features.confs[args.extractor]
+    matcher_conf = match_features.confs[args.matcher]
 
     pairs_from_covisibility.main(sift_sfm, sfm_pairs, num_matched=num_covis)
     features = extract_features.main(feature_conf, ref_images, outputs, as_half=True)
@@ -73,7 +73,8 @@ def run_slice(slice_, root, outputs, num_covis, num_loc):
 
     localize_sfm.main(
         ref_sfm,
-        dataset / "queries/*_time_queries_with_intrinsics.txt",
+        dataset / "queries_with_intrinsics.txt",
+        # dataset / "queries/*_time_queries_with_intrinsics.txt",
         loc_pairs,
         features,
         loc_matches,
@@ -114,11 +115,31 @@ if __name__ == "__main__":
         default=10,
         help="Number of image pairs for loc, default: %(default)s",
     )
+    
+    parser.add_argument(
+        "--extractor",
+        type=str,
+        default="alike",
+        help="Local extractor config, default: %(default)s",
+    )
+    parser.add_argument(
+        "--global_extractor",
+        type=str,
+        default="netvlad",
+        help="Global extractor config, default: %(default)s",
+    )
+    parser.add_argument(
+        "--matcher",
+        type=str,
+        default="NN",
+        help="Matcher  config, default: %(default)s",
+    )
+    
     args = parser.parse_args()
 
-    if args.slice == "*":
+    if args.slices == "*":
         slices = TEST_SLICES
-    if "-" in args.slices:
+    elif "-" in args.slices:
         min_, max_ = args.slices.split("-")
         slices = list(range(int(min_), int(max_) + 1))
     else:

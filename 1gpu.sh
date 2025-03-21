@@ -1,0 +1,1 @@
+srun --ntasks=1 --cpus-per-task=40 --gres=gpu:1 --time=01:00:00 -C v100-32g --qos=qos_gpu-dev -A xab@v100 --pty bash -i

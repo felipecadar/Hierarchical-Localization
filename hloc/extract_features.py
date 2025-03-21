@@ -26,6 +26,27 @@ line using their name. Each is a dictionary with the following entries:
     - preprocessing: how to preprocess the images read from disk.
 """
 confs = {
+
+    'alike': {
+        'output': 'feats-alike-n4096-r1024',
+        'model': {
+            'name': 'easy-features',
+            'elf_model': 'alike',
+            'elf_conf': {
+                'model_name': 'alike-t',
+                'top_k': 4096,
+                'scores_th': 0.0,
+                'n_limit': 10000,
+                'sub_pixel': True,
+                'model_path': None
+            }
+        },
+        'preprocessing': {
+            'grayscale': False,
+            'resize_max': 1024,
+        },
+    },
+
     "superpoint_aachen": {
         "output": "feats-superpoint-n4096-r1024",
         "model": {

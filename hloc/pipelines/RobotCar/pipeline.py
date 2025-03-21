@@ -58,15 +58,15 @@ def run(args):
     outputs.mkdir(exist_ok=True, parents=True)
     query_list = outputs / "{condition}_queries_with_intrinsics.txt"
     sift_sfm = outputs / "sfm_sift"
-    reference_sfm = outputs / "sfm_superpoint+superglue"
+    reference_sfm = outputs / f"sfm_{args.extractor}+{args.matcher}"
     sfm_pairs = outputs / f"pairs-db-covis{args.num_covis}.txt"
-    loc_pairs = outputs / f"pairs-query-netvlad{args.num_loc}.txt"
-    results = outputs / f"RobotCar_hloc_superpoint+superglue_netvlad{args.num_loc}.txt"
+    loc_pairs = outputs / f"pairs-query-{args.global_extractor}{args.num_loc}.txt"
+    results = outputs / f"RobotCar_hloc_{args.extractor}+{args.matcher}_{args.global_extractor}{args.num_loc}.txt"
 
     # pick one of the configurations for extraction and matching
-    retrieval_conf = extract_features.confs["netvlad"]
-    feature_conf = extract_features.confs["superpoint_aachen"]
-    matcher_conf = match_features.confs["superglue"]
+    retrieval_conf = extract_features.confs[args.global_extractor]
+    feature_conf = extract_features.confs[args.extractor]
+    matcher_conf = match_features.confs[args.matcher]
 
     for condition in CONDITIONS:
         generate_query_list(
@@ -140,4 +140,24 @@ if __name__ == "__main__":
         default=20,
         help="Number of image pairs for loc, default: %(default)s",
     )
+    parser.add_argument(
+        "--extractor",
+        type=str,
+        default="alike",
+        help="Local extractor config, default: %(default)s",
+    )
+    parser.add_argument(
+        "--global_extractor",
+        type=str,
+        default="netvlad",
+        help="Global extractor config, default: %(default)s",
+    )
+    parser.add_argument(
+        "--matcher",
+        type=str,
+        default="NN",
+        help="Matcher  config, default: %(default)s",
+    )
     args = parser.parse_args()
+    
+    run(args)
