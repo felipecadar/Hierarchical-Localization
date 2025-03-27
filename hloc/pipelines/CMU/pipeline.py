@@ -73,8 +73,7 @@ def run_slice(slice_, root, outputs, num_covis, num_loc):
 
     localize_sfm.main(
         ref_sfm,
-        dataset / "queries_with_intrinsics.txt",
-        # dataset / "queries/*_time_queries_with_intrinsics.txt",
+        dataset / 'queries_with_intrinsics.txt',
         loc_pairs,
         features,
         loc_matches,
@@ -147,6 +146,7 @@ if __name__ == "__main__":
         if isinstance(slices, int):
             slices = [slices]
 
+    print(f"Running on slices {slices}.")
     for slice_ in slices:
         logger.info("Working on slice %s.", slice_)
         run_slice(

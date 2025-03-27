@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name="cmu-aliked"
+#SBATCH --job-name="aac-aliked"
 #SBATCH --mail-user=felipecadarchamone@gmail.com
 #SBATCH --mail-type=ALL
 #SBATCH --output="log_%j.out" # out file name
@@ -44,6 +44,7 @@ echo "Job nodes : $SLURM_NNODES"
 echo '--------------------------------------'
 
 module purge
+
 # module load arch/a100
 if [[ $SLURM_JOB_PARTITION == "gpu_p5" ]]; then
     echo "Loading A100 module"
@@ -53,13 +54,10 @@ fi
 module load python/3.9.12
 conda activate hloc
 
-DATASET=$SCRATCH/Datasets/hloc/datasets/cmu_extended
-OUTPUT=$SCRATCH/Datasets/hloc/outputs/alike_netvlad/cmu_extended_debug_2
-
-# rm -rf $OUTPUT
-
+DATASET=$SCRATCH/Datasets/hloc/datasets/aachen
+OUTPUT=$SCRATCH/Datasets/hloc/outputs/alike_netvlad/aachen
 EXTRACTOR=alike
 MATCHER=NN-mutual
 GLOBAL_EXTRACTOR=netvlad
 
-python -m hloc.pipelines.CMU.pipeline --dataset $DATASET --outputs $OUTPUT --extractor $EXTRACTOR --matcher $MATCHER --global_extractor $GLOBAL_EXTRACTOR --slices 2
+python -m hloc.pipelines.Aachen.pipeline --dataset $DATASET --outputs $OUTPUT --extractor $EXTRACTOR --matcher $MATCHER --global_extractor $GLOBAL_EXTRACTOR

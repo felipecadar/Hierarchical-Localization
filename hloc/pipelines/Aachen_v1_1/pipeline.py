@@ -20,15 +20,15 @@ def run(args):
     sift_sfm = dataset / "3D-models/aachen_v_1_1"
 
     outputs = args.outputs  # where everything will be saved
-    reference_sfm = outputs / "sfm_superpoint+superglue"  # the SfM model we will build
+    reference_sfm = outputs / f"sfm_{args.extractor}+{args.matcher}"  # the SfM model we will build
     sfm_pairs = (
         outputs / f"pairs-db-covis{args.num_covis}.txt"
     )  # top-k most covisible in SIFT model
     loc_pairs = (
-        outputs / f"pairs-query-netvlad{args.num_loc}.txt"
-    )  # top-k retrieved by NetVLAD
+        outputs / f"pairs-query-{args.global_extractor}{args.num_loc}.txt"
+    )  # top-k retrieved by {args.global_extractor}
     results = (
-        outputs / f"Aachen-v1.1_hloc_superpoint+superglue_netvlad{args.num_loc}.txt"
+        outputs / f"Aachen-v1.1_hloc_{args.extractor}+{args.matcher}_{args.global_extractor}{args.num_loc}.txt"
     )
 
     # list the standard configurations available
@@ -36,9 +36,9 @@ def run(args):
     logger.info("Configs for feature matchers:\n%s", pformat(match_features.confs))
 
     # pick one of the configurations for extraction and matching
-    retrieval_conf = extract_features.confs["netvlad"]
-    feature_conf = extract_features.confs["superpoint_max"]
-    matcher_conf = match_features.confs["superglue"]
+    retrieval_conf = extract_features.confs[args.global_extractor]
+    feature_conf = extract_features.confs[args.extractor]
+    matcher_conf = match_features.confs[args.matcher]
 
     features = extract_features.main(feature_conf, images, outputs)
 
@@ -65,7 +65,8 @@ def run(args):
 
     localize_sfm.main(
         reference_sfm,
-        dataset / "queries/*_time_queries_with_intrinsics.txt",
+        # dataset / "queries/*_time_queries_with_intrinsics.txt",
+        dataset / "queries_with_intrinsics.txt",
         loc_pairs,
         features,
         loc_matches,
@@ -99,6 +100,24 @@ if __name__ == "__main__":
         type=int,
         default=50,
         help="Number of image pairs for loc, default: %(default)s",
+    )
+    parser.add_argument(
+        "--extractor",
+        type=str,
+        default="alike",
+        help="Local extractor config, default: %(default)s",
+    )
+    parser.add_argument(
+        "--global_extractor",
+        type=str,
+        default="netvlad",
+        help="Global extractor config, default: %(default)s",
+    )
+    parser.add_argument(
+        "--matcher",
+        type=str,
+        default="NN",
+        help="Matcher  config, default: %(default)s",
     )
     args = parser.parse_args()
     run(args)
